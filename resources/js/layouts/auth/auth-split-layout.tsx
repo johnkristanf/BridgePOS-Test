@@ -27,6 +27,7 @@ export default function AuthSplitLayout({
               src={APP_ASSETS.BRIDGE_LOGO}
               alt="Bridge Logo"
               className="h-16 w-auto"
+              disableEffect
             />
           </Link>
           <div className="relative z-10 flex flex-col items-start gap-2 text-left">
@@ -45,6 +46,7 @@ export default function AuthSplitLayout({
           src={APP_ASSETS.AUTH_USI_BG}
           alt="Company Background"
           className="absolute inset-0 h-full w-full object-cover"
+          disableEffect
         />
         <div className="absolute inset-0 bg-white/80" />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/5" />
@@ -55,6 +57,7 @@ export default function AuthSplitLayout({
               src={APP_ASSETS.USI_LOGO}
               alt="USI Logo"
               className="mx-auto w-full max-w-md h-auto drop-shadow-2xl"
+              disableEffect
             />
           </div>
         </div>

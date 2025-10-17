@@ -4,29 +4,25 @@ import { useEffect } from "react"
 import { useForm as useReactHookForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import { DynamicForm } from "@/components/ui/forms/dynamic-form"
-import { useLoginUser } from "@/hooks/api/auth"
-import { LoginPayload, loginSchema } from "@/types/auth"
+import { useForgotPassword } from "@/hooks/api/auth"
+import { ForgotPasswordPayload, forgotPasswordSchema } from "@/types/auth"
 import { DynamicFormType, FieldConfig } from "@/types/form"
 
-export const LoginForm = () => {
-  const { mutate: login, isPending } = useLoginUser()
+export const ForgotPasswordForm = () => {
+  const { mutate: forgotPassword, isPending } = useForgotPassword()
 
-  const inertiaForm = useForm<LoginPayload>({
+  const inertiaForm = useForm<ForgotPasswordPayload>({
     email: "",
-    password: "",
-    remember: false,
   })
 
-  const reactHookForm = useReactHookForm<LoginPayload>({
-    resolver: zodResolver(loginSchema) as any,
+  const reactHookForm = useReactHookForm<ForgotPasswordPayload>({
+    resolver: zodResolver(forgotPasswordSchema) as any,
     defaultValues: {
       email: "",
-      password: "",
-      remember: false,
     },
   })
 
-  const loginForm = {
+  const forgotPasswordForm = {
     ...reactHookForm,
     data: inertiaForm.data,
     errors: inertiaForm.errors,
@@ -41,12 +37,12 @@ export const LoginForm = () => {
       reactHookForm.clearErrors(name)
       inertiaForm.clearErrors(name as any)
     },
-  } as unknown as DynamicFormType<LoginPayload>
+  } as unknown as DynamicFormType<ForgotPasswordPayload>
 
   useEffect(() => {
     if (inertiaForm.errors) {
       Object.entries(inertiaForm.errors).forEach(([key, value]) => {
-        reactHookForm.setError(key as keyof LoginPayload, {
+        reactHookForm.setError(key as keyof ForgotPasswordPayload, {
           type: "manual",
           message: value,
         })
@@ -54,7 +50,7 @@ export const LoginForm = () => {
     }
   }, [inertiaForm.errors, reactHookForm])
 
-  const loginFields: FieldConfig<LoginPayload>[] = [
+  const forgotPasswordFields: FieldConfig<ForgotPasswordPayload>[] = [
     {
       name: "email",
       type: "email",
@@ -64,20 +60,12 @@ export const LoginForm = () => {
       autoComplete: "email",
       disabled: isPending,
     },
-    {
-      name: "password",
-      type: "password-input",
-      label: "Password",
-      placeholder: "••••••••",
-      autoComplete: "current-password",
-      disabled: isPending,
-    },
   ]
 
-  const handleSubmit = async (data: LoginPayload) => {
+  const handleSubmit = async (data: ForgotPasswordPayload) => {
     await toast.promise(
       new Promise((resolve, reject) => {
-        login(data, {
+        forgotPassword(data, {
           onSuccess: (response) => {
             reactHookForm.reset()
             inertiaForm.reset()
@@ -89,7 +77,7 @@ export const LoginForm = () => {
         })
       }),
       {
-        loading: "Logging in...",
+        loading: "Sending reset link...",
         success: (message) => message as string,
         error: (err) => err as string,
       },
@@ -97,11 +85,11 @@ export const LoginForm = () => {
   }
 
   return (
-    <DynamicForm<LoginPayload>
-      form={loginForm}
-      fields={loginFields}
+    <DynamicForm<ForgotPasswordPayload>
+      form={forgotPasswordForm}
+      fields={forgotPasswordFields}
       onSubmit={handleSubmit}
-      submitButtonTitle="Sign in"
+      submitButtonTitle="Email password reset link"
       submitButtonClassname="w-full"
       size="md"
     />

@@ -4,29 +4,43 @@ import { useEffect } from "react"
 import { useForm as useReactHookForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import { DynamicForm } from "@/components/ui/forms/dynamic-form"
-import { useLoginUser } from "@/hooks/api/auth"
-import { LoginPayload, loginSchema } from "@/types/auth"
+import { useResetPassword } from "@/hooks/api/auth"
+import { ResetPasswordPayload, resetPasswordSchema } from "@/types/auth"
 import { DynamicFormType, FieldConfig } from "@/types/form"
 
-export const LoginForm = () => {
-  const { mutate: login, isPending } = useLoginUser()
+interface ResetPasswordFormProps {
+  token: string
+  email: string
+}
 
-  const inertiaForm = useForm<LoginPayload>({
-    email: "",
+export const ResetPasswordForm = ({ token, email }: ResetPasswordFormProps) => {
+  const { mutate: resetPassword, isPending } = useResetPassword()
+
+  const inertiaForm = useForm<ResetPasswordPayload>({
+    token,
+    email,
     password: "",
-    remember: false,
+    password_confirmation: "",
   })
 
-  const reactHookForm = useReactHookForm<LoginPayload>({
-    resolver: zodResolver(loginSchema) as any,
+  const reactHookForm = useReactHookForm<ResetPasswordPayload>({
+    resolver: zodResolver(resetPasswordSchema) as any,
     defaultValues: {
-      email: "",
+      token,
+      email,
       password: "",
-      remember: false,
+      password_confirmation: "",
     },
   })
 
-  const loginForm = {
+  useEffect(() => {
+    reactHookForm.setValue("token", token)
+    reactHookForm.setValue("email", email)
+    inertiaForm.setData("token", token)
+    inertiaForm.setData("email", email)
+  }, [token, email])
+
+  const resetPasswordForm = {
     ...reactHookForm,
     data: inertiaForm.data,
     errors: inertiaForm.errors,
@@ -41,12 +55,12 @@ export const LoginForm = () => {
       reactHookForm.clearErrors(name)
       inertiaForm.clearErrors(name as any)
     },
-  } as unknown as DynamicFormType<LoginPayload>
+  } as unknown as DynamicFormType<ResetPasswordPayload>
 
   useEffect(() => {
     if (inertiaForm.errors) {
       Object.entries(inertiaForm.errors).forEach(([key, value]) => {
-        reactHookForm.setError(key as keyof LoginPayload, {
+        reactHookForm.setError(key as keyof ResetPasswordPayload, {
           type: "manual",
           message: value,
         })
@@ -54,30 +68,38 @@ export const LoginForm = () => {
     }
   }, [inertiaForm.errors, reactHookForm])
 
-  const loginFields: FieldConfig<LoginPayload>[] = [
+  const resetPasswordFields: FieldConfig<ResetPasswordPayload>[] = [
     {
       name: "email",
       type: "email",
       label: "Email address",
       placeholder: "email@example.com",
-      autoFocus: true,
       autoComplete: "email",
-      disabled: isPending,
+      disabled: true,
     },
     {
       name: "password",
       type: "password-input",
       label: "Password",
       placeholder: "••••••••",
-      autoComplete: "current-password",
+      autoFocus: true,
+      autoComplete: "new-password",
+      disabled: isPending,
+    },
+    {
+      name: "password_confirmation",
+      type: "password-input",
+      label: "Confirm password",
+      placeholder: "••••••••",
+      autoComplete: "new-password",
       disabled: isPending,
     },
   ]
 
-  const handleSubmit = async (data: LoginPayload) => {
+  const handleSubmit = async (data: ResetPasswordPayload) => {
     await toast.promise(
       new Promise((resolve, reject) => {
-        login(data, {
+        resetPassword(data, {
           onSuccess: (response) => {
             reactHookForm.reset()
             inertiaForm.reset()
@@ -89,7 +111,7 @@ export const LoginForm = () => {
         })
       }),
       {
-        loading: "Logging in...",
+        loading: "Resetting password...",
         success: (message) => message as string,
         error: (err) => err as string,
       },
@@ -97,11 +119,11 @@ export const LoginForm = () => {
   }
 
   return (
-    <DynamicForm<LoginPayload>
-      form={loginForm}
-      fields={loginFields}
+    <DynamicForm<ResetPasswordPayload>
+      form={resetPasswordForm}
+      fields={resetPasswordFields}
       onSubmit={handleSubmit}
-      submitButtonTitle="Sign in"
+      submitButtonTitle="Reset password"
       submitButtonClassname="w-full"
       size="md"
     />

@@ -109,7 +109,7 @@ export interface FieldConfig<TFieldValues extends FieldValues = FieldValues> {
     | "otp"
     | "custom"
   label: string
-  placeholder: string
+  placeholder?: string
   className?: string
   labelClassName?: string
   inputClassName?: string

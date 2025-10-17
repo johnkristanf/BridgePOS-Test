@@ -1,23 +1,12 @@
-import { Form, Head } from "@inertiajs/react"
-import { REGEXP_ONLY_DIGITS } from "input-otp"
+import { Head } from "@inertiajs/react"
 import { useMemo, useState } from "react"
-import InputError from "@/components/input-error"
+import { TwoFactorChallengeForm } from "@/components/features/auth/two-factor-challenge/two-factor-challenge-form"
 import TextLink from "@/components/text-link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/inputs/input"
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/inputs/input-otp"
-import { OTP_MAX_LENGTH } from "@/hooks/ui/use-two-factor-auth"
 import AuthSplitLayout from "@/layouts/auth/auth-split-layout"
 import { login } from "@/routes"
-import { store } from "@/routes/two-factor/login"
 
 export default function TwoFactorChallenge() {
   const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false)
-  const [code, setCode] = useState<string>("")
 
   const authConfigContent = useMemo<{
     title: string
@@ -41,10 +30,8 @@ export default function TwoFactorChallenge() {
     }
   }, [showRecoveryInput])
 
-  const toggleRecoveryMode = (clearErrors: () => void): void => {
+  const toggleRecoveryMode = (): void => {
     setShowRecoveryInput(!showRecoveryInput)
-    clearErrors()
-    setCode("")
   }
 
   return (
@@ -55,65 +42,21 @@ export default function TwoFactorChallenge() {
       <Head title="Two-Factor Auth" />
 
       <div className="space-y-6">
-        <Form
-          {...store.form()}
-          className="space-y-4"
-          resetOnError
-          resetOnSuccess={!showRecoveryInput}
-        >
-          {({ errors, processing }) => (
-            <>
-              {showRecoveryInput ? (
-                <>
-                  <Input
-                    name="recovery_code"
-                    type="text"
-                    placeholder="Enter recovery code"
-                    autoFocus={showRecoveryInput}
-                    required
-                  />
-                  <InputError message={errors.recovery_code} />
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center space-y-3 text-center">
-                  <div className="flex w-full items-center justify-center">
-                    <InputOTP
-                      name="code"
-                      maxLength={OTP_MAX_LENGTH}
-                      value={code}
-                      onChange={(value) => setCode(value)}
-                      disabled={processing}
-                      pattern={REGEXP_ONLY_DIGITS}
-                    >
-                      <InputOTPGroup>
-                        {Array.from({ length: OTP_MAX_LENGTH }, (_, index) => (
-                          <InputOTPSlot key={index} index={index} />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                  <InputError message={errors.code} />
-                </div>
-              )}
+        <TwoFactorChallengeForm showRecoveryInput={showRecoveryInput} />{" "}
+        <div className="space-y-2 text-center text-sm">
+          <button
+            type="button"
+            onClick={toggleRecoveryMode}
+            className="text-muted-foreground underline-offset-4 hover:underline"
+          >
+            {authConfigContent.toggleText}
+          </button>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={processing}
-                variant={"bridge_digital"}
-              >
-                Continue
-              </Button>
-
-              <div className="text-center text-sm text-muted-foreground">
-                <span>remembered your password? </span>
-                <TextLink href={login()} tabIndex={6}>
-                  Log in
-                </TextLink>
-              </div>
-            </>
-          )}
-        </Form>
+          <div className="text-muted-foreground">
+            <span>remembered your password? </span>
+            <TextLink href={login()}>Log in</TextLink>
+          </div>
+        </div>
       </div>
     </AuthSplitLayout>
   )

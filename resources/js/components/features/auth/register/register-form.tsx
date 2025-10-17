@@ -1,32 +1,35 @@
+// -
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "@inertiajs/react"
 import { useEffect } from "react"
 import { useForm as useReactHookForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import { DynamicForm } from "@/components/ui/forms/dynamic-form"
-import { useLoginUser } from "@/hooks/api/auth"
-import { LoginPayload, loginSchema } from "@/types/auth"
+import { useRegisterUser } from "@/hooks/api/auth"
+import { RegisterPayload, registerSchema } from "@/types/auth"
 import { DynamicFormType, FieldConfig } from "@/types/form"
 
-export const LoginForm = () => {
-  const { mutate: login, isPending } = useLoginUser()
+export const RegisterForm = () => {
+  const { mutate: register, isPending } = useRegisterUser()
 
-  const inertiaForm = useForm<LoginPayload>({
+  const inertiaForm = useForm<RegisterPayload>({
+    name: "",
     email: "",
     password: "",
-    remember: false,
+    password_confirmation: "",
   })
 
-  const reactHookForm = useReactHookForm<LoginPayload>({
-    resolver: zodResolver(loginSchema) as any,
+  const reactHookForm = useReactHookForm<RegisterPayload>({
+    resolver: zodResolver(registerSchema) as any,
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      remember: false,
+      password_confirmation: "",
     },
   })
 
-  const loginForm = {
+  const registerForm = {
     ...reactHookForm,
     data: inertiaForm.data,
     errors: inertiaForm.errors,
@@ -41,12 +44,12 @@ export const LoginForm = () => {
       reactHookForm.clearErrors(name)
       inertiaForm.clearErrors(name as any)
     },
-  } as unknown as DynamicFormType<LoginPayload>
+  } as unknown as DynamicFormType<RegisterPayload>
 
   useEffect(() => {
     if (inertiaForm.errors) {
       Object.entries(inertiaForm.errors).forEach(([key, value]) => {
-        reactHookForm.setError(key as keyof LoginPayload, {
+        reactHookForm.setError(key as keyof RegisterPayload, {
           type: "manual",
           message: value,
         })
@@ -54,13 +57,21 @@ export const LoginForm = () => {
     }
   }, [inertiaForm.errors, reactHookForm])
 
-  const loginFields: FieldConfig<LoginPayload>[] = [
+  const registerFields: FieldConfig<RegisterPayload>[] = [
+    {
+      name: "name",
+      type: "text",
+      label: "Name",
+      placeholder: "Full name",
+      autoFocus: true,
+      autoComplete: "name",
+      disabled: isPending,
+    },
     {
       name: "email",
       type: "email",
       label: "Email address",
       placeholder: "email@example.com",
-      autoFocus: true,
       autoComplete: "email",
       disabled: isPending,
     },
@@ -69,15 +80,23 @@ export const LoginForm = () => {
       type: "password-input",
       label: "Password",
       placeholder: "••••••••",
-      autoComplete: "current-password",
+      autoComplete: "new-password",
+      disabled: isPending,
+    },
+    {
+      name: "password_confirmation",
+      type: "password-input",
+      label: "Confirm password",
+      placeholder: "••••••••",
+      autoComplete: "new-password",
       disabled: isPending,
     },
   ]
 
-  const handleSubmit = async (data: LoginPayload) => {
+  const handleSubmit = async (data: RegisterPayload) => {
     await toast.promise(
       new Promise((resolve, reject) => {
-        login(data, {
+        register(data, {
           onSuccess: (response) => {
             reactHookForm.reset()
             inertiaForm.reset()
@@ -89,7 +108,7 @@ export const LoginForm = () => {
         })
       }),
       {
-        loading: "Logging in...",
+        loading: "Creating account...",
         success: (message) => message as string,
         error: (err) => err as string,
       },
@@ -97,11 +116,11 @@ export const LoginForm = () => {
   }
 
   return (
-    <DynamicForm<LoginPayload>
-      form={loginForm}
-      fields={loginFields}
+    <DynamicForm<RegisterPayload>
+      form={registerForm}
+      fields={registerFields}
       onSubmit={handleSubmit}
-      submitButtonTitle="Sign in"
+      submitButtonTitle="Create account"
       submitButtonClassname="w-full"
       size="md"
     />

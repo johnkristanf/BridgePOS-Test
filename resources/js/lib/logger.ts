@@ -10,7 +10,9 @@ class Logger {
   private config: LoggerConfig
 
   constructor(
-    config: LoggerConfig = { enabled: process.env.NODE_ENV === "development" },
+    config: LoggerConfig = {
+      enabled: import.meta.env.NODE_ENV === "development",
+    },
   ) {
     this.config = {
       timestamp: true,
@@ -106,15 +108,15 @@ class Logger {
 
 export const logger = new Logger()
 export const middlewareLogger = new Logger({
-  enabled: process.env.NODE_ENV === "development",
+  enabled: import.meta.env.NODE_ENV === "development",
   prefix: "MIDDLEWARE",
 })
 export const apiLogger = new Logger({
-  enabled: process.env.NODE_ENV === "development",
+  enabled: import.meta.env.NODE_ENV === "development",
   prefix: "API",
 })
 export const clientLogger = new Logger({
-  enabled: process.env.NODE_ENV === "development",
+  enabled: import.meta.env.NODE_ENV === "development",
   prefix: "CLIENT",
 })
 
