@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedInteger('code');
             $table->string('name');
-            $table->foreignId('department_id')->constrained('departments');
             $table->timestamps();
         });
     }

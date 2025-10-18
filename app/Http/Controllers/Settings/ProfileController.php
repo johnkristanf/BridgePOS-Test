@@ -40,6 +40,12 @@ class ProfileController extends Controller
         return to_route('profile.edit');
     }
 
+
+    public function testEndpoint()
+    {
+        return response()->json(['message' => 'Valid ka boss']);
+    }
+
     /**
      * Delete the user's account.
      */

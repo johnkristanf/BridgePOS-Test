@@ -8,8 +8,8 @@ class Departments extends Model
 {
     protected $guarded = ['id'];
 
-    public function roles()
+    public function users()
     {
-        return $this->hasMany(Roles::class);
+        return $this->hasMany(User::class, 'department_id');
     }
 }
